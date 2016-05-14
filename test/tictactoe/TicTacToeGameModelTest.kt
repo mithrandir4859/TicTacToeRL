@@ -62,7 +62,7 @@ class TicTacToeGameModelTest {
         assertFalse(modelUnderTest.full)
     }
 
-    @Test fun draw(){
+    @Test fun reverseDiagonalWinFullBoard(){
         modelUnderTest.makeMove(2, 2)
         modelUnderTest.makeMove(0, 0)
 
@@ -78,8 +78,28 @@ class TicTacToeGameModelTest {
         modelUnderTest.makeMove(1, 1)
 
         assertTrue(modelUnderTest.full)
-        assertEquals(GameStatus.DRAW, modelUnderTest.gameStatus)
+        assertEquals(GameStatus.SOMEONE_WON, modelUnderTest.gameStatus)
+        assertEquals(Symbol.CROSS, modelUnderTest.winner)
+    }
 
+    @Test(expected = IllegalStateException::class) fun draw(){
+        modelUnderTest.makeMove(0, 0)
+        modelUnderTest.makeMove(0, 1)
+
+        modelUnderTest.makeMove(0, 2)
+        modelUnderTest.makeMove(1, 0)
+
+        modelUnderTest.makeMove(1, 1)
+        modelUnderTest.makeMove(2, 2)
+
+        modelUnderTest.makeMove(1, 2)
+        modelUnderTest.makeMove(2, 0)
+
+        modelUnderTest.makeMove(2, 1)
+
+        assertTrue(modelUnderTest.full)
+        assertEquals(GameStatus.DRAW, modelUnderTest.gameStatus)
+        modelUnderTest.winner
     }
 
 

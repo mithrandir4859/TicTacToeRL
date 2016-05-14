@@ -47,9 +47,14 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
         gameBoard[row][column] = currentSymbol
         val potentialWinners = hashSetOf(
                 getRowWinner(row),
-                getColumnWinner(column),
-                getDiagonalWinner(row, column)
+                getColumnWinner(column)
         )
+        if (row == column) {
+            potentialWinners.add(getMainDiagonalWinner())
+        }
+        if (row + column == gridSizeMinusOne){
+            potentialWinners.add(getReverseDiagonalWinner())
+        }
         potentialWinners.remove(null)
         if (potentialWinners.size > 1) throw AssertionError("Logic failed")
         if (potentialWinners.size == 1) {
@@ -57,7 +62,11 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
             _gameStatus = GameStatus.SOMEONE_WON
             return
         }
-        if (full){
+        val winner = getWinner(potentialWinners)
+        if (winner != null) {
+            _winner = potentialWinners.iterator().next()!!
+            _gameStatus = GameStatus.SOMEONE_WON
+        } else if (full) {
             _gameStatus = GameStatus.DRAW
         } else {
             _currentSymbol = currentSymbol.other
@@ -68,16 +77,18 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
         return if (symbols.size == 1) symbols.iterator().next() else null
     }
 
-    private fun getDiagonalWinner(row: Int, column: Int): Symbol? {
+    private fun getMainDiagonalWinner(): Symbol? {
         val symbols = HashSet<Symbol?>()
-        if (row == column) {
-            for (i in 0..gridSizeMinusOne) {
-                symbols.add(gameBoard[i][i])
-            }
-        } else if (row + column == gridSizeMinusOne) {
-            for (i in 0..gridSizeMinusOne) {
-                symbols.add(gameBoard[i][gridSizeMinusOne - i])
-            }
+        for (i in 0..gridSizeMinusOne) {
+            symbols.add(gameBoard[i][i])
+        }
+        return getWinner(symbols)
+    }
+
+    private fun getReverseDiagonalWinner(): Symbol? {
+        val symbols = HashSet<Symbol?>()
+        for (i in 0..gridSizeMinusOne) {
+            symbols.add(gameBoard[i][gridSizeMinusOne - i])
         }
         return getWinner(symbols)
     }
