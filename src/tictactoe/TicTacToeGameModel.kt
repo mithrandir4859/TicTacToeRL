@@ -1,13 +1,13 @@
 package tictactoe
 
 import util.Indexable
-import java.util.HashSet
+import java.util.*
 
 
 class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> {
 
     private val gameBoard: Array<Array<Symbol?>> = Array<Array<Symbol?>>(gridSize) { Array(gridSize) { null } }
-    val gridSizeMinusOne = gridSize - 1
+    private val gridSizeMinusOne = gridSize - 1
 
     private var _currentSymbol: Symbol = Symbol.CROSS
     private var _winner: Symbol = Symbol.CROSS
@@ -45,26 +45,13 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
             throw IllegalArgumentException("Cell ($row, $column) is already occupied with $boardSymbol")
         }
         gameBoard[row][column] = currentSymbol
-        val potentialWinners = hashSetOf(
-                getRowWinner(row),
-                getColumnWinner(column)
-        )
-        if (row == column) {
-            potentialWinners.add(getMainDiagonalWinner())
-        }
-        if (row + column == gridSizeMinusOne){
-            potentialWinners.add(getReverseDiagonalWinner())
-        }
-        potentialWinners.remove(null)
-        if (potentialWinners.size > 1) throw AssertionError("Logic failed")
-        if (potentialWinners.size == 1) {
-            _winner = potentialWinners.iterator().next()!!
-            _gameStatus = GameStatus.SOMEONE_WON
-            return
-        }
-        val winner = getWinner(potentialWinners)
+        val winner = getWinner(row, column)
+        updateModelState(winner)
+    }
+
+    private fun updateModelState(winner: Symbol?) {
         if (winner != null) {
-            _winner = potentialWinners.iterator().next()!!
+            _winner = winner
             _gameStatus = GameStatus.SOMEONE_WON
         } else if (full) {
             _gameStatus = GameStatus.DRAW
@@ -73,34 +60,37 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
         }
     }
 
-    private fun getWinner(symbols: Collection<Symbol?>): Symbol? {
-        return if (symbols.size == 1) symbols.iterator().next() else null
-    }
+    private fun getRow(row: Int) = gameBoard[row].toList()
 
-    private fun getMainDiagonalWinner(): Symbol? {
-        val symbols = HashSet<Symbol?>()
-        for (i in 0..gridSizeMinusOne) {
-            symbols.add(gameBoard[i][i])
+    private fun getColumn(column: Int) = (0..gridSizeMinusOne).map { row -> gameBoard[row][column] }.toList()
+
+    private val mainDiagonal: List<Symbol?>
+        get() = (0..gridSizeMinusOne).map { i -> gameBoard[i][i] }.toList()
+
+    private val reverseDiagonal: List<Symbol?>
+        get() = (0..gridSizeMinusOne).map { i -> gameBoard[i][gridSizeMinusOne - i] }.toList()
+
+    private fun getWinner(row: Int, column: Int): Symbol? {
+        val symbolSequencesToCheck = hashSetOf(
+                getColumn(column), getRow(row)
+        )
+        if (row == column) {
+            symbolSequencesToCheck.add(mainDiagonal)
         }
-        return getWinner(symbols)
-    }
-
-    private fun getReverseDiagonalWinner(): Symbol? {
-        val symbols = HashSet<Symbol?>()
-        for (i in 0..gridSizeMinusOne) {
-            symbols.add(gameBoard[i][gridSizeMinusOne - i])
+        if (row + column == gridSizeMinusOne) {
+            symbolSequencesToCheck.add(reverseDiagonal)
         }
-        return getWinner(symbols)
-    }
-
-    private fun getRowWinner(row: Int): Symbol? = getWinner(gameBoard[row].toHashSet())
-
-    private fun getColumnWinner(column: Int): Symbol? {
-        val columnValues = HashSet<Symbol?>()
-        for (row in 0..gridSizeMinusOne) {
-            columnValues.add(gameBoard[row][column])
+        val potentialWinners = symbolSequencesToCheck.map {
+            symbols -> if (symbols.toHashSet().size == 1) symbols.iterator().next() else null
+        }.toHashSet()
+        potentialWinners.remove(null)
+        if (potentialWinners.isEmpty()) {
+            return null
         }
-        return getWinner(columnValues)
+        if (potentialWinners.size == 1) {
+            return potentialWinners.iterator().next()
+        }
+        throw AssertionError("Logic failed")
     }
 
     override fun get(i: Int): Indexable<Symbol?> =

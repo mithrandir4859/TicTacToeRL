@@ -21,3 +21,4 @@ ultimate/out
 ultimate/tmp
 ultimate/workspace.xml
 ultimate/*.versionsBackup
+findbugs-idea.xml
