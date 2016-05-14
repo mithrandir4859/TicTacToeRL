@@ -11,7 +11,6 @@ class TicTacToeGameModelTest {
 
     @Test fun simple() {
         modelUnderTest.makeMove(0, 0)
-        assertFalse(modelUnderTest.full)
         assertEquals(GameStatus.UNFINISHED, modelUnderTest.gameStatus)
     }
 
@@ -22,7 +21,6 @@ class TicTacToeGameModelTest {
         }
         modelUnderTest.makeMove(0, 2)
 
-        assertFalse(modelUnderTest.full)
         assertEquals(GameStatus.SOMEONE_WON, modelUnderTest.gameStatus)
         assertEquals(Symbol.CROSS, modelUnderTest.winner)
     }
@@ -59,7 +57,6 @@ class TicTacToeGameModelTest {
 
         assertEquals(GameStatus.SOMEONE_WON, modelUnderTest.gameStatus)
         assertEquals(Symbol.NOUGHT, modelUnderTest.winner)
-        assertFalse(modelUnderTest.full)
     }
 
     @Test fun reverseDiagonalWinFullBoard(){
@@ -77,7 +74,6 @@ class TicTacToeGameModelTest {
 
         modelUnderTest.makeMove(1, 1)
 
-        assertTrue(modelUnderTest.full)
         assertEquals(GameStatus.SOMEONE_WON, modelUnderTest.gameStatus)
         assertEquals(Symbol.CROSS, modelUnderTest.winner)
     }
@@ -97,7 +93,6 @@ class TicTacToeGameModelTest {
 
         modelUnderTest.makeMove(2, 1)
 
-        assertTrue(modelUnderTest.full)
         assertEquals(GameStatus.DRAW, modelUnderTest.gameStatus)
         modelUnderTest.winner
     }

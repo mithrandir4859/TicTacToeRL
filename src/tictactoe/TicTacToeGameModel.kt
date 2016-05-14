@@ -31,7 +31,7 @@ class TicTacToeGameModel(val gridSize: Int = 3) : Indexable<Indexable<Symbol?>> 
             throw IllegalStateException("No winner")
         }
 
-    val full: Boolean
+    private val full: Boolean
         get() {
             for (i in 0..gridSizeMinusOne)
                 for (j in 0..gridSizeMinusOne)
